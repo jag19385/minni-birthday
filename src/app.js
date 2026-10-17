@@ -1151,9 +1151,7 @@
     const MUSIC_SOURCES = [
       S.music || 'music/as_it_was_instrumental.mp3',
       'music/as_it_was_instrumental.mp3',
-      'public/music/as_it_was_instrumental.mp3',
-      'music/as-it-was-instrumental.mp3',
-      'public/music/as-it-was-instrumental.mp3'
+      'music/as-it-was-instrumental.mp3'
     ];
 
     let currentSourceIndex = 0;
@@ -1234,7 +1232,7 @@
       } catch (err) {
         updateUI(false);
         if (isManual) {
-          showToast("Add 'as-it-was-instrumental.mp3' to public/music/ to enable music.", 4200);
+          showToast("Add 'as-it-was-instrumental.mp3' to music/ to enable music.", 4200);
         }
       }
     }
