@@ -1028,12 +1028,15 @@ body[data-theme="reunion"] .media-card .card-caption {
 .gallery-stage {
   width: 100%;
   height: 100%;
+  min-height: 0;
   max-width: 1220px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 4px 6px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .gallery-bento {
@@ -1342,31 +1345,324 @@ body[data-theme="reunion"] .media-card .card-caption {
   margin-top: 2px;
 }
 
-/* ------------------------------------------------------------- RESPONSIVE TWEAKS */
-@media (max-width: 600px) {
+/* ------------------------------------------------------------- COMPREHENSIVE RESPONSIVE DESIGN (ALL SCREENS) */
+
+/* TABLETS & MEDIUM SCREENS (681px - 1024px) */
+@media (min-width: 681px) and (max-width: 1024px) {
+  .scene-gallery {
+    padding:
+      max(12px, env(safe-area-inset-top))
+      max(18px, env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-bottom))
+      max(18px, env(safe-area-inset-left));
+  }
+  .gallery-header {
+    padding: 0 54px;
+  }
+  .gallery-bento.bento-6 {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr 1fr;
+  }
+  .gallery-bento.bento-6 .bento-card:nth-child(1) { grid-column: 1 / 3; grid-row: 1 / 2; }
+  .gallery-bento.bento-6 .bento-card:nth-child(2) { grid-column: 3 / 4; grid-row: 1 / 2; }
+  .gallery-bento.bento-6 .bento-card:nth-child(3) { grid-column: 1 / 2; grid-row: 2 / 3; }
+  .gallery-bento.bento-6 .bento-card:nth-child(4) { grid-column: 2 / 3; grid-row: 2 / 3; }
+  .gallery-bento.bento-6 .bento-card:nth-child(5) { grid-column: 3 / 4; grid-row: 2 / 3; }
+}
+
+/* SMARTPHONES & SMALL TABLETS (<= 680px) */
+@media (max-width: 680px) {
+  /* Scene Container & Safe Area */
   .scene {
+    gap: clamp(6px, 1.4vh, 12px);
     padding:
       max(8px, env(safe-area-inset-top))
       max(12px, env(safe-area-inset-right))
       max(12px, env(safe-area-inset-bottom))
       max(12px, env(safe-area-inset-left));
   }
+
+  /* Fixed Music Button on mobile */
+  .music {
+    top: max(10px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+    width: 40px;
+    height: 40px;
+    z-index: 45;
+  }
+
+  /* Panels & Cards across all story scenes */
   .panel {
-    padding: 16px 18px;
+    padding: clamp(14px, 2.5vh, 22px) clamp(14px, 3.8vw, 22px);
     border-radius: 20px;
+    max-height: calc(100dvh - 120px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  .gallery-grid {
-    grid-template-columns: repeat(2, 1fr);
+
+  .copy {
+    font-size: clamp(14px, 1.05vw + 1.4vh, 17px);
+    line-height: 1.55;
+  }
+  .copy > * + * {
+    margin-top: 0.6em;
+  }
+
+  .chapter-title {
+    font-size: clamp(1.45rem, 5.2vw, 2rem);
+  }
+
+  .highlight-word {
+    font-size: clamp(1.9rem, 6.2vw, 2.8rem);
+  }
+
+  /* Media rows with 2 photos (Scenes 3, 5, 6, 8) */
+  .media-row {
     gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: nowrap;
   }
-  .gallery-item {
-    max-height: 20vh;
+  .media-card {
+    max-width: calc(50% - 4px);
+    padding: 5px 5px 12px;
+    border-radius: 6px;
+  }
+  .media-card img,
+  .media-card video {
+    max-height: min(22vh, 175px);
+  }
+  .media-card .card-caption {
+    font-size: 0.68rem;
+    margin-top: 4px;
+  }
+
+  /* Controls & Action Buttons */
+  .controls {
+    gap: 8px;
+    padding-top: 2px;
+    width: 100%;
+  }
+  .btn {
+    min-height: 44px;
+    padding: 0.6em 1.2em;
+    font-size: 0.88rem;
+  }
+  .btn.soft,
+  .btn.ghost {
+    flex: 0 0 auto;
+    padding: 0.6em 1em;
   }
   .btn.primary {
-    padding: 0.8em 1.5em;
+    flex: 1 1 auto;
+    max-width: none;
+    padding: 0.65em 1.4em;
+  }
+
+  /* ------------------------------------------------------------- GALLERY SCENE MOBILE ALIGNMENT */
+  .scene-gallery {
+    grid-template-rows: auto 1fr auto;
+    padding:
+      max(8px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      max(10px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+    gap: 8px;
+  }
+
+  .gallery-header {
+    padding: 0 46px 0 6px; /* Graceful clearance for top-right music button */
+    gap: 4px;
+  }
+
+  .gallery-heading {
+    font-size: clamp(1.2rem, 4.8vw, 1.55rem);
+    letter-spacing: 0.12em;
+  }
+
+  .gallery-sub {
+    font-size: clamp(0.78rem, 3.2vw, 0.92rem);
+  }
+
+  .gallery-controls-bar {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 2px 2px 4px;
+    gap: 8px;
+  }
+  .gallery-controls-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gallery-segmented-control {
+    flex-shrink: 0;
+    gap: 2px;
+    padding: 2.5px;
+  }
+
+  .gallery-seg-tab {
+    padding: 5.5px 12px;
+    font-size: 0.73rem;
+  }
+
+  .gallery-page-indicator {
+    flex-shrink: 0;
+    padding: 2px 7px;
+    font-size: 0.72rem;
+  }
+
+  .gallery-stage {
+    align-items: flex-start;
+    padding: 2px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(216, 180, 106, 0.3) transparent;
+  }
+
+  /* 2-COLUMN BALANCED BENTO GRID FOR PHONES */
+  .gallery-bento {
+    max-height: none;
+    height: auto;
+    gap: 10px;
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-rows: auto !important;
+    padding-bottom: 8px;
+  }
+
+  /* Bento-6 on Mobile: Hero Top (2-col), 2x2 Middle, Hero Bottom (2-col) */
+  .gallery-bento.bento-6 .bento-card:nth-child(1) {
+    grid-column: 1 / 3 !important;
+    grid-row: auto !important;
+    min-height: 180px;
+    aspect-ratio: 16 / 10;
+  }
+  .gallery-bento.bento-6 .bento-card:nth-child(2),
+  .gallery-bento.bento-6 .bento-card:nth-child(3),
+  .gallery-bento.bento-6 .bento-card:nth-child(4),
+  .gallery-bento.bento-6 .bento-card:nth-child(5) {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    min-height: 165px;
+    aspect-ratio: 3 / 4;
+  }
+  .gallery-bento.bento-6 .bento-card:nth-child(6) {
+    grid-column: 1 / 3 !important;
+    grid-row: auto !important;
+    min-height: 180px;
+    aspect-ratio: 16 / 10;
+  }
+
+  /* Bento-5 on Mobile: Hero Top (2-col), 2 cards middle, Hero Bottom (2-col) */
+  .gallery-bento.bento-5 .bento-card:nth-child(1) {
+    grid-column: 1 / 3 !important;
+    grid-row: auto !important;
+    min-height: 180px;
+    aspect-ratio: 16 / 10;
+  }
+  .gallery-bento.bento-5 .bento-card:nth-child(2),
+  .gallery-bento.bento-5 .bento-card:nth-child(3),
+  .gallery-bento.bento-5 .bento-card:nth-child(4) {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    min-height: 165px;
+    aspect-ratio: 3 / 4;
+  }
+  .gallery-bento.bento-5 .bento-card:nth-child(5) {
+    grid-column: 1 / 3 !important;
+    grid-row: auto !important;
+    min-height: 180px;
+    aspect-ratio: 16 / 10;
+  }
+
+  /* Bento-4 on Mobile: Clean 2x2 Grid */
+  .gallery-bento.bento-4 .bento-card {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    min-height: 165px;
+    aspect-ratio: 3 / 4;
+  }
+
+  /* Mobile Bento Card Overlays */
+  .bento-card {
+    border-radius: 14px;
+  }
+  .bento-card img {
+    object-position: center 20%;
+  }
+  .bento-overlay {
+    padding: 8px 10px;
+    background: linear-gradient(180deg, transparent 40%, rgba(9, 14, 28, 0.92) 100%);
+  }
+  .bento-title {
+    font-size: 0.82rem;
+  }
+  .bento-sub {
+    font-size: 0.71rem;
+    margin-top: 1px;
+  }
+
+  /* Mobile Lightbox */
+  .lightbox {
+    padding: 8px 10px;
+  }
+  .lightbox-topbar {
+    min-height: 38px;
+  }
+  .lightbox-stage {
+    gap: 8px;
+  }
+  .lightbox-frame {
+    max-width: 96vw;
+    max-height: calc(100dvh - 140px);
+    border-radius: 14px;
+  }
+  .lightbox-frame img,
+  .lightbox-frame video {
+    max-height: calc(100dvh - 210px);
+  }
+  .lightbox-nav {
+    width: 38px;
+    height: 38px;
+    font-size: 1.25rem;
+  }
+  .lightbox-close {
+    width: 38px;
+    height: 38px;
+    font-size: 1.3rem;
   }
 }
 
+/* EXTRA SMALL SCREENS (<= 360px: e.g. iPhone SE, Galaxy Z Flip cover) */
+@media (max-width: 360px) {
+  .scene {
+    padding: 6px 8px;
+  }
+  .gallery-heading {
+    font-size: 1.15rem;
+  }
+  .gallery-seg-tab {
+    padding: 5px 9px;
+    font-size: 0.7rem;
+  }
+  .btn {
+    padding: 0.55em 1em;
+    font-size: 0.82rem;
+  }
+  .bento-title {
+    font-size: 0.76rem;
+  }
+  .bento-sub {
+    font-size: 0.67rem;
+  }
+}
+
+/* SHORT HEIGHT & LANDSCAPE DEVICES (Phones in landscape, split screens) */
 @media (max-height: 580px) and (orientation: landscape) {
   .scene {
     gap: 4px;
@@ -1375,6 +1671,10 @@ body[data-theme="reunion"] .media-card .card-caption {
   .scene-top {
     min-height: 28px;
     padding: 0 40px;
+  }
+  .gallery-header {
+    padding: 0 40px;
+    gap: 2px;
   }
   .panel {
     padding: 10px 20px;
@@ -1387,15 +1687,20 @@ body[data-theme="reunion"] .media-card .card-caption {
   .media-card video {
     max-height: 24vh;
   }
-  .gallery-grid {
-    grid-template-columns: repeat(4, 1fr);
+  .gallery-bento {
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-rows: auto !important;
+    max-height: calc(100dvh - 110px);
   }
-  .gallery-item {
-    max-height: 24vh;
+  .gallery-bento .bento-card {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    min-height: 120px;
+    aspect-ratio: 16 / 9;
   }
   .btn {
-    min-height: 40px;
-    padding: 0.5em 1.2em;
+    min-height: 38px;
+    padding: 0.45em 1.1em;
   }
 }
 
