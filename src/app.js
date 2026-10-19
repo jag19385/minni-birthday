@@ -687,19 +687,21 @@
   }
 
   /* ------------------------------------------------------------- SCENE 10: EDITORIAL GALLERY */
+  /* ------------------------------------------------------------- SCENE 10: EDITORIAL GALLERY */
   function buildGallery() {
     const d = S.gallery;
     const scene = el('section', 'scene scene-gallery');
 
-    // Header with refined typography & segmented controls
+    // Region 1: Header with refined typography
     const topHeader = el('header', 'scene-top gallery-header');
-    
     const titleRow = el('div', 'gallery-title-row');
     const heading = el('h2', 'gallery-heading', d.title);
     const sub = el('p', 'gallery-sub', d.subtitle);
     titleRow.append(heading, sub);
     topHeader.appendChild(titleRow);
+    scene.appendChild(topHeader);
 
+    // Region 2: Category Selector & Page Indicator Bar
     const controlsBar = el('div', 'gallery-controls-bar');
     const segControl = el('div', 'gallery-segmented-control');
     segControl.setAttribute('role', 'tablist');
@@ -716,10 +718,9 @@
     pageIndicator.append(prevPageBtn, pageText, nextPageBtn);
 
     controlsBar.append(segControl, pageIndicator);
-    topHeader.appendChild(controlsBar);
-    scene.appendChild(topHeader);
+    scene.appendChild(controlsBar);
 
-    // Stage & Bento container
+    // Region 3: Gallery Stage & Cards Grid
     const bodyEl = el('div', 'scene-body gallery-stage');
     const bentoGrid = el('div', 'gallery-bento');
     bodyEl.appendChild(bentoGrid);
@@ -728,12 +729,35 @@
     let activeGroupId = d.groups[0].id;
     let activePageIndex = 0;
 
-    function getActivePhotoList() {
-      const group = d.groups.find((g) => g.id === activeGroupId) || d.groups[0];
-      if (group.pages && group.pages.length) {
-        return group.pages[activePageIndex] || group.pages[0];
+    function isMobileLayout() {
+      return window.innerWidth <= 768 || window.innerHeight <= 580;
+    }
+
+    function getGroupPages(group) {
+      if (isMobileLayout()) {
+        const all = group.photos || [];
+        const pages = [];
+        const chunkSize = 4;
+        for (let i = 0; i < all.length; i += chunkSize) {
+          pages.push(all.slice(i, i + chunkSize));
+        }
+        return pages.length ? pages : [[]];
       }
-      return group.photos;
+      if (group.pages && group.pages.length) {
+        return group.pages;
+      }
+      return [group.photos || []];
+    }
+
+    function getPagesForCurrentGroup() {
+      const group = d.groups.find((g) => g.id === activeGroupId) || d.groups[0];
+      return getGroupPages(group);
+    }
+
+    function getActivePhotoList() {
+      const pages = getPagesForCurrentGroup();
+      if (activePageIndex >= pages.length) activePageIndex = 0;
+      return pages[activePageIndex] || [];
     }
 
     function getAllGroupPhotos() {
@@ -746,23 +770,34 @@
       const group = d.groups.find((g) => g.id === activeGroupId) || d.groups[0];
       const pagePhotos = getActivePhotoList();
       const allPhotos = getAllGroupPhotos();
+      const pages = getPagesForCurrentGroup();
 
-      // Configure bento class based on count
+      // Configure grid classes
       bentoGrid.className = 'gallery-bento';
-      if (pagePhotos.length >= 6) {
-        bentoGrid.classList.add('bento-6');
-      } else if (pagePhotos.length === 5) {
-        bentoGrid.classList.add('bento-5');
+      if (isMobileLayout()) {
+        if (pagePhotos.length <= 1) {
+          bentoGrid.classList.add('bento-1');
+        } else if (pagePhotos.length === 2) {
+          bentoGrid.classList.add('bento-2');
+        } else {
+          bentoGrid.classList.add('bento-4');
+        }
       } else {
-        bentoGrid.classList.add('bento-4');
+        if (pagePhotos.length >= 6) {
+          bentoGrid.classList.add('bento-6');
+        } else if (pagePhotos.length === 5) {
+          bentoGrid.classList.add('bento-5');
+        } else {
+          bentoGrid.classList.add('bento-4');
+        }
       }
 
       // Update multi-page indicator
-      if (group.pages && group.pages.length > 1) {
+      if (pages.length > 1) {
         pageIndicator.hidden = false;
-        pageText.textContent = `${activePageIndex + 1} / ${group.pages.length}`;
+        pageText.textContent = `${activePageIndex + 1} / ${pages.length}`;
         prevPageBtn.disabled = activePageIndex <= 0;
-        nextPageBtn.disabled = activePageIndex >= group.pages.length - 1;
+        nextPageBtn.disabled = activePageIndex >= pages.length - 1;
       } else {
         pageIndicator.hidden = true;
       }
@@ -789,7 +824,6 @@
 
         // Click opens full-screen interactive lightbox
         card.addEventListener('click', () => {
-          // Find index in full group collection
           const fullIdx = allPhotos.findIndex((p) => p.src === photo.src);
           openLightbox(allPhotos, fullIdx !== -1 ? fullIdx : 0, group.label);
         });
@@ -826,6 +860,7 @@
         });
         tabBtn.classList.add('active');
         tabBtn.setAttribute('aria-selected', 'true');
+        tabBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 
         renderGalleryCards();
       });
@@ -842,16 +877,51 @@
     });
 
     nextPageBtn.addEventListener('click', () => {
-      const group = d.groups.find((g) => g.id === activeGroupId);
-      if (group && group.pages && activePageIndex < group.pages.length - 1) {
+      const pages = getPagesForCurrentGroup();
+      if (activePageIndex < pages.length - 1) {
         activePageIndex++;
         renderGalleryCards();
       }
     });
 
+    // Touch Swipe Gesture for Touch-Friendly Pagination
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    bodyEl.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchEndX = touchStartX;
+      touchEndY = touchStartY;
+    }, { passive: true });
+
+    bodyEl.addEventListener('touchmove', (e) => {
+      if (e.touches.length !== 1) return;
+      touchEndX = e.touches[0].clientX;
+      touchEndY = e.touches[0].clientY;
+    }, { passive: true });
+
+    bodyEl.addEventListener('touchend', () => {
+      const dx = touchEndX - touchStartX;
+      const dy = touchEndY - touchStartY;
+      if (Math.abs(dx) > 36 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+        const pages = getPagesForCurrentGroup();
+        if (dx < 0 && activePageIndex < pages.length - 1) {
+          activePageIndex++;
+          renderGalleryCards();
+        } else if (dx > 0 && activePageIndex > 0) {
+          activePageIndex--;
+          renderGalleryCards();
+        }
+      }
+    }, { passive: true });
+
     renderGalleryCards();
 
-    // Footer with exactly "Read the note →"
+    // Region 4: Fixed Bottom Navigation Controls
     const controls = renderControls({
       primaryLabel: d.button || "Read the note →",
       showBack: true,
@@ -1397,11 +1467,31 @@
 
   /* ------------------------------------------------------------- INIT & PRELOAD */
   let resizeTimer = 0;
+  let lastWasMobile = window.innerWidth <= 768 || window.innerHeight <= 580;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(fitAll, 80);
+    resizeTimer = setTimeout(() => {
+      fitAll();
+      const nowMobile = window.innerWidth <= 768 || window.innerHeight <= 580;
+      if (curScene === 10 && nowMobile !== lastWasMobile) {
+        lastWasMobile = nowMobile;
+        const currentStage = stage.querySelector('.scene-gallery');
+        if (currentStage) {
+          const newGallery = SCENE_BUILDERS[10]();
+          stage.replaceChildren(newGallery);
+        }
+      }
+    }, 80);
   });
-  window.addEventListener('orientationchange', () => setTimeout(fitAll, 200));
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      fitAll();
+      if (curScene === 10) {
+        const newGallery = SCENE_BUILDERS[10]();
+        stage.replaceChildren(newGallery);
+      }
+    }, 200);
+  });
 
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(fitAll);
@@ -1427,5 +1517,13 @@
   ].forEach(resolveImage);
 
   document.title = S.meta.title;
-  goToScene(0);
+  const hash = (window.location.hash || '').replace('#', '').toLowerCase();
+  let startScene = 0;
+  if (hash === 'gallery' || hash === '10') {
+    startScene = 10;
+  } else if (/^\d+$/.test(hash)) {
+    const parsed = parseInt(hash, 10);
+    if (parsed >= 0 && parsed < TOTAL_SCENES) startScene = parsed;
+  }
+  goToScene(startScene);
 })();
